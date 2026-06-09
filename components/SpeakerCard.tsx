@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Globe, Mic2 } from "lucide-react";
-import { getInitials } from "@/lib/storage";
+import { getInitials } from "@/lib/data/mappers";
 import type { Speaker } from "@/lib/types";
 
 interface SpeakerCardProps {
