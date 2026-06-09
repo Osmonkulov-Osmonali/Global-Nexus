@@ -2,7 +2,7 @@
 
 import { motion, useMotionValue, useMotionValueEvent, animate } from "framer-motion";
 import { useEffect, useState } from "react";
-import { GOAL } from "@/lib/storage";
+import { GOAL } from "@/lib/data/mappers";
 
 interface CounterProps {
   value: number;

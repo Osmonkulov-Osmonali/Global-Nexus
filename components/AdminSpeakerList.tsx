@@ -1,12 +1,12 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
-import { getInitials } from "@/lib/storage";
+import { getInitials } from "@/lib/data/mappers";
 import type { Speaker } from "@/lib/types";
 
 interface AdminSpeakerListProps {
   speakers: Speaker[];
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => Promise<void>;
 }
 
 export default function AdminSpeakerList({ speakers, onRemove }: AdminSpeakerListProps) {
