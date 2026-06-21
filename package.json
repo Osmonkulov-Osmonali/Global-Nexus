@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "setup:supabase": "bash scripts/setup-supabase.sh",
+    "verify:setup": "node scripts/verify-setup.mjs",
     "db:push": "supabase db push",
     "db:status": "supabase migration list"
   },
