@@ -1,0 +1,7 @@
+Copy these into Vercel → Project → Settings → Environment Variables
+Enable for: Production, Preview, Development
+
+NEXT_PUBLIC_SUPABASE_URL=https://epldjzqnwozqqlqgnwuu.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_FBn2oEzPH_82uaTHqpQSyw_DFtYX5nY
+
+After adding → Deployments → Redeploy

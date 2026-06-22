@@ -1,7 +1,10 @@
-import type { Speaker } from "./types";
+import type { AdminSpeakerInput, Speaker, SpeakerApplication, SpeakerApplicationInput } from "@/lib/types";
+import { GOAL, getInitials } from "@/lib/data/mappers";
+
+export { GOAL, getInitials };
 
 export const STORAGE_KEY = "global-nexus-speakers";
-export const GOAL = 1000;
+export const APPLICATIONS_KEY = "global-nexus-applications";
 
 const seedData: Omit<Speaker, "id" | "createdAt">[] = [
   { name: "Sarah Chen", role: "CEO", company: "NovaStack", topic: "Scaling AI products from zero to enterprise", photoUrl: "", country: "US" },
@@ -30,64 +33,71 @@ const seedData: Omit<Speaker, "id" | "createdAt">[] = [
   { name: "Emma Wilson", role: "CFO", company: "UnitOps", topic: "Unit economics and financial modeling", photoUrl: "", country: "AU" },
 ];
 
-const seedSpeakers: Speaker[] = seedData.map((item, i) => ({
+export const seedSpeakers: Speaker[] = seedData.map((item, i) => ({
   ...item,
   id: String(i + 1),
   createdAt: new Date(2025, 0, 5 + i).toISOString(),
 }));
 
-/*
- * Supabase (uncomment when ready):
- *
- * import { createClient } from '@supabase/supabase-js';
- * const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
- *
- * export async function fetchSpeakers(): Promise<Speaker[]> {
- *   const { data } = await supabase.from('speakers').select('*').order('created_at', { ascending: false });
- *   return data ?? [];
- * }
- */
-
-export function getSpeakers(): Speaker[] {
-  if (typeof window === "undefined") return seedSpeakers;
-
+function readJson<T>(key: string, fallback: T): T {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(seedSpeakers));
-      return seedSpeakers;
-    }
-    return JSON.parse(raw) as Speaker[];
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    return JSON.parse(raw) as T;
   } catch {
-    return seedSpeakers;
+    return fallback;
   }
 }
 
-export function saveSpeakers(speakers: Speaker[]): void {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(speakers));
+function writeJson<T>(key: string, value: T): void {
+  localStorage.setItem(key, JSON.stringify(value));
 }
 
-export function addSpeaker(input: Omit<Speaker, "id" | "createdAt">): Speaker {
-  const speakers = getSpeakers();
+export function getLocalSpeakers(): Speaker[] {
+  const stored = readJson<Speaker[] | null>(STORAGE_KEY, null);
+  if (!stored) {
+    writeJson(STORAGE_KEY, seedSpeakers);
+    return seedSpeakers;
+  }
+  return stored;
+}
+
+export function addLocalSpeaker(input: AdminSpeakerInput): Speaker {
+  const speakers = getLocalSpeakers();
   const newSpeaker: Speaker = {
     ...input,
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
   };
-  saveSpeakers([newSpeaker, ...speakers]);
+  writeJson(STORAGE_KEY, [newSpeaker, ...speakers]);
   return newSpeaker;
 }
 
-export function removeSpeaker(id: string): void {
-  saveSpeakers(getSpeakers().filter((s) => s.id !== id));
+export function removeLocalSpeaker(id: string): void {
+  writeJson(
+    STORAGE_KEY,
+    getLocalSpeakers().filter((s) => s.id !== id)
+  );
 }
 
-export function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+export function getLocalApplications(): SpeakerApplication[] {
+  return readJson<SpeakerApplication[]>(APPLICATIONS_KEY, []);
+}
+
+export function addLocalApplication(input: SpeakerApplicationInput): SpeakerApplication {
+  const applications = getLocalApplications();
+  const application: SpeakerApplication = {
+    ...input,
+    id: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+  };
+  writeJson(APPLICATIONS_KEY, [application, ...applications]);
+  return application;
+}
+
+export function removeLocalApplication(id: string): void {
+  writeJson(
+    APPLICATIONS_KEY,
+    getLocalApplications().filter((a) => a.id !== id)
+  );
 }
