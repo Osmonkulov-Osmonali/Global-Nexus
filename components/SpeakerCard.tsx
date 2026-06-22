@@ -17,7 +17,7 @@ export default function SpeakerCard({ speaker, index }: SpeakerCardProps) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.55, delay: (index % 6) * 0.06 }}
-      whileHover={{ y: -6 }}
+      whileHover={{ y: -6, scale: 1.02 }}
       className="group glass relative overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:border-cyan-500/25 hover:shadow-glow"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 via-blue-500/0 to-violet-500/0 opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
