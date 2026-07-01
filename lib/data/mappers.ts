@@ -1,13 +1,27 @@
 import type {
+  AdminEventInput,
   AdminSpeakerInput,
   DbApplicationRow,
+  DbEventRow,
   DbSpeakerRow,
+  EventFormat,
+  EventItem,
   Speaker,
   SpeakerApplication,
   SpeakerApplicationInput,
+  SpeakerStatus,
 } from "@/lib/types";
 
 export const GOAL = 1000;
+
+function normalizeStatus(value: string | null | undefined): SpeakerStatus {
+  return value === "upcoming" ? "upcoming" : "featured";
+}
+
+function normalizeFormat(value: string | null | undefined): EventFormat {
+  if (value === "offline" || value === "hybrid") return value;
+  return "online";
+}
 
 export function mapSpeakerRow(row: DbSpeakerRow): Speaker {
   return {
@@ -18,6 +32,7 @@ export function mapSpeakerRow(row: DbSpeakerRow): Speaker {
     topic: row.topic,
     photoUrl: row.photo_url,
     country: row.country,
+    status: normalizeStatus(row.status),
     createdAt: row.created_at,
   };
 }
@@ -33,6 +48,19 @@ export function mapApplicationRow(row: DbApplicationRow): SpeakerApplication {
   };
 }
 
+export function mapEventRow(row: DbEventRow): EventItem {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    date: row.date,
+    location: row.location,
+    format: normalizeFormat(row.format),
+    link: row.link,
+    createdAt: row.created_at,
+  };
+}
+
 export function speakerToDb(input: AdminSpeakerInput) {
   return {
     name: input.name,
@@ -41,6 +69,7 @@ export function speakerToDb(input: AdminSpeakerInput) {
     topic: input.topic,
     photo_url: input.photoUrl,
     country: input.country,
+    status: input.status,
   };
 }
 
@@ -50,6 +79,17 @@ export function applicationToDb(input: SpeakerApplicationInput) {
     company_role: input.companyRole,
     social_link: input.socialLink,
     topic: input.topic,
+  };
+}
+
+export function eventToDb(input: AdminEventInput) {
+  return {
+    title: input.title,
+    description: input.description,
+    date: input.date,
+    location: input.location,
+    format: input.format,
+    link: input.link,
   };
 }
 

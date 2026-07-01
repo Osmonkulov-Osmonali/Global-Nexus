@@ -25,8 +25,23 @@ create table if not exists public.speaker_applications (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.events (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  description text not null default '',
+  date text not null default '',
+  location text not null default '',
+  format text not null default 'online',
+  link text not null default '',
+  created_at timestamptz not null default now()
+);
+
+-- Speaker status: 'featured' (already interviewed) or 'upcoming' (expected)
+alter table public.speakers add column if not exists status text not null default 'featured';
+
 alter table public.speakers enable row level security;
 alter table public.speaker_applications enable row level security;
+alter table public.events enable row level security;
 
 drop policy if exists "Speakers are publicly readable" on public.speakers;
 drop policy if exists "Authenticated users can insert speakers" on public.speakers;
@@ -35,6 +50,10 @@ drop policy if exists "Authenticated users can delete speakers" on public.speake
 drop policy if exists "Anyone can submit speaker applications" on public.speaker_applications;
 drop policy if exists "Authenticated users can read applications" on public.speaker_applications;
 drop policy if exists "Authenticated users can delete applications" on public.speaker_applications;
+drop policy if exists "Events are publicly readable" on public.events;
+drop policy if exists "Authenticated users can insert events" on public.events;
+drop policy if exists "Authenticated users can update events" on public.events;
+drop policy if exists "Authenticated users can delete events" on public.events;
 
 create policy "Speakers are publicly readable"
   on public.speakers for select to anon, authenticated using (true);
@@ -56,6 +75,18 @@ create policy "Authenticated users can read applications"
 
 create policy "Authenticated users can delete applications"
   on public.speaker_applications for delete to authenticated using (true);
+
+create policy "Events are publicly readable"
+  on public.events for select to anon, authenticated using (true);
+
+create policy "Authenticated users can insert events"
+  on public.events for insert to authenticated with check (true);
+
+create policy "Authenticated users can update events"
+  on public.events for update to authenticated using (true) with check (true);
+
+create policy "Authenticated users can delete events"
+  on public.events for delete to authenticated using (true);
 
 insert into public.speakers (name, role, company, topic, country, created_at)
 select * from (values
@@ -89,6 +120,13 @@ where not exists (select 1 from public.speakers limit 1);
 do $$
 begin
   alter publication supabase_realtime add table public.speakers;
+exception
+  when duplicate_object then null;
+end $$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.events;
 exception
   when duplicate_object then null;
 end $$;

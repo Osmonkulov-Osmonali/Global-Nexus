@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Global Nexus — 1,000 Leaders. One Knowledge Base.",
+  title: "Global Nexus — 1,000 Global Leaders. One Knowledge Base.",
   description:
-    "A media challenge to interview and feature 1,000 global leaders in IT, tech, and startups.",
+    "An official media initiative to interview and feature 1,000 global leaders, founders, and investors in IT and business.",
 };
 
 export default function RootLayout({

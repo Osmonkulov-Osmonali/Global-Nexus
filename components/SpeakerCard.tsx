@@ -41,6 +41,11 @@ export default function SpeakerCard({ speaker, index }: SpeakerCardProps) {
               <Globe className="h-2.5 w-2.5" />
               {speaker.country}
             </span>
+            {speaker.status === "upcoming" && (
+              <span className="shrink-0 rounded-md border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-300">
+                Upcoming
+              </span>
+            )}
           </div>
           <p className="mt-0.5 truncate text-sm text-slate-400">
             {speaker.role} at {speaker.company}

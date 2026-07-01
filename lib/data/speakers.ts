@@ -38,7 +38,21 @@ export async function createSpeaker(input: AdminSpeakerInput): Promise<Speaker> 
     .select("*")
     .single();
 
-  if (error) throw error;
+  if (error) {
+    // The deployed database may not have the status column yet
+    // (until supabase/SETUP.sql is re-run). Retry without it.
+    if (error.code === "42703" || /status/i.test(error.message)) {
+      const { status: _status, ...withoutStatus } = speakerToDb(input);
+      const retry = await supabase
+        .from("speakers")
+        .insert(withoutStatus)
+        .select("*")
+        .single();
+      if (retry.error) throw retry.error;
+      return mapSpeakerRow(retry.data);
+    }
+    throw error;
+  }
   return mapSpeakerRow(data);
 }
 

@@ -37,7 +37,7 @@ export default function HeroSection({ count, isLoaded }: HeroSectionProps) {
             Global Nexus
             <span className="text-cyan-500/50">·</span>
             <Globe2 className="h-3.5 w-3.5" />
-            Media Challenge
+            Official Media Initiative
           </motion.div>
 
           <h1 className="text-4xl font-bold leading-[1.08] tracking-tight text-gradient sm:text-6xl lg:text-7xl">

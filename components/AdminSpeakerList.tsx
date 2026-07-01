@@ -32,6 +32,11 @@ export default function AdminSpeakerList({ speakers, onRemove }: AdminSpeakerLis
               <p className="truncate font-medium text-white">
                 {speaker.name}{" "}
                 <span className="text-slate-500">({speaker.country})</span>
+                {speaker.status === "upcoming" && (
+                  <span className="ml-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-300 align-middle">
+                    Upcoming
+                  </span>
+                )}
               </p>
               <p className="truncate text-sm text-slate-500">
                 {speaker.role} · {speaker.company} · {speaker.topic}

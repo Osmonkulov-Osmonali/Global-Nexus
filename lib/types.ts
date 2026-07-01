@@ -1,3 +1,5 @@
+export type SpeakerStatus = "featured" | "upcoming";
+
 export interface Speaker {
   id: string;
   name: string;
@@ -6,6 +8,7 @@ export interface Speaker {
   topic: string;
   photoUrl: string;
   country: string;
+  status: SpeakerStatus;
   createdAt: string;
 }
 
@@ -32,6 +35,29 @@ export interface AdminSpeakerInput {
   topic: string;
   photoUrl: string;
   country: string;
+  status: SpeakerStatus;
+}
+
+export type EventFormat = "online" | "offline" | "hybrid";
+
+export interface EventItem {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  format: EventFormat;
+  link: string;
+  createdAt: string;
+}
+
+export interface AdminEventInput {
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  format: EventFormat;
+  link: string;
 }
 
 export interface DbSpeakerRow {
@@ -42,6 +68,7 @@ export interface DbSpeakerRow {
   topic: string;
   photo_url: string;
   country: string;
+  status?: string | null;
   created_at: string;
 }
 
@@ -51,5 +78,16 @@ export interface DbApplicationRow {
   company_role: string;
   social_link: string;
   topic: string;
+  created_at: string;
+}
+
+export interface DbEventRow {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  format: string;
+  link: string;
   created_at: string;
 }

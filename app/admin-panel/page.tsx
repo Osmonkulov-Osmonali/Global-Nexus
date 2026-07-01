@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Database, LayoutDashboard, LogOut } from "lucide-react";
 import AdminApplicationList from "@/components/AdminApplicationList";
+import AdminEventForm from "@/components/AdminEventForm";
+import AdminEventList from "@/components/AdminEventList";
 import AdminSpeakerForm from "@/components/AdminSpeakerForm";
 import AdminSpeakerList from "@/components/AdminSpeakerList";
 import { useSpeakers } from "@/contexts/SpeakersContext";
@@ -15,11 +17,14 @@ export default function AdminPanelPage() {
   const {
     speakers,
     applications,
+    events,
     count,
     usesSupabase,
     addSpeaker,
     removeSpeaker,
     removeApplication,
+    addEvent,
+    removeEvent,
   } = useSpeakers();
 
   const handleLogout = async () => {
@@ -71,6 +76,8 @@ export default function AdminPanelPage() {
       <main className="mx-auto max-w-4xl space-y-8 px-6 py-10">
         <AdminSpeakerForm onAdd={addSpeaker} />
         <AdminSpeakerList speakers={speakers} onRemove={removeSpeaker} />
+        <AdminEventForm onAdd={addEvent} />
+        <AdminEventList events={events} onRemove={removeEvent} />
         <AdminApplicationList applications={applications} onRemove={removeApplication} />
       </main>
     </div>

@@ -41,8 +41,9 @@ export default function SpeakerFormModal({ isOpen, onClose }: SpeakerFormModalPr
         setForm(empty);
         onClose();
       }, 2200);
-    } catch {
-      setError("Could not submit your application. Please try again.");
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      setError(`Could not submit your application. (${detail})`);
     } finally {
       setSubmitting(false);
     }

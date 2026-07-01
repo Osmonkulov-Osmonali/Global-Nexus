@@ -15,6 +15,7 @@ const empty: AdminSpeakerInput = {
   topic: "",
   photoUrl: "",
   country: "",
+  status: "featured",
 };
 
 const inputClass =
@@ -23,19 +24,24 @@ const inputClass =
 export default function AdminSpeakerForm({ onAdd }: AdminSpeakerFormProps) {
   const [form, setForm] = useState(empty);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setError(null);
     try {
       await onAdd(form);
       setForm(empty);
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      setError(`Could not add speaker. (${detail})`);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const fields: { key: keyof AdminSpeakerInput; label: string; placeholder: string; required?: boolean }[] = [
+  const fields: { key: Exclude<keyof AdminSpeakerInput, "status">; label: string; placeholder: string; required?: boolean }[] = [
     { key: "name", label: "Name", placeholder: "Sarah Chen" },
     { key: "role", label: "Role", placeholder: "CEO" },
     { key: "company", label: "Company", placeholder: "NovaStack" },
@@ -49,7 +55,7 @@ export default function AdminSpeakerForm({ onAdd }: AdminSpeakerFormProps) {
       <h2 className="mb-5 text-lg font-semibold text-white">Add speaker</h2>
       <div className="grid gap-4 sm:grid-cols-2">
         {fields.map(({ key, label, placeholder, required = true }) => (
-          <div key={key} className={key === "topic" || key === "photoUrl" ? "sm:col-span-2" : ""}>
+          <div key={key} className={key === "topic" ? "sm:col-span-2" : ""}>
             <label className="mb-1.5 block text-sm text-slate-400">{label}</label>
             <input
               required={required}
@@ -60,7 +66,23 @@ export default function AdminSpeakerForm({ onAdd }: AdminSpeakerFormProps) {
             />
           </div>
         ))}
+        <div>
+          <label className="mb-1.5 block text-sm text-slate-400">Status</label>
+          <select
+            value={form.status}
+            onChange={(e) =>
+              setForm({ ...form, status: e.target.value === "upcoming" ? "upcoming" : "featured" })
+            }
+            className={inputClass}
+          >
+            <option value="featured" className="bg-slate-900">Featured (session published)</option>
+            <option value="upcoming" className="bg-slate-900">Upcoming (expected guest)</option>
+          </select>
+        </div>
       </div>
+
+      {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+
       <button
         type="submit"
         disabled={submitting}

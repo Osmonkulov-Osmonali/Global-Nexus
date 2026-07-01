@@ -12,12 +12,18 @@ export default function Navbar() {
           Global Nexus
         </Link>
         <nav className="flex items-center gap-6 text-sm text-slate-400">
-          <a href="#nexus-wall" className="transition hover:text-white">
-            Nexus Wall
+          <a href="#about" className="hidden transition hover:text-white sm:block">
+            About
           </a>
-          <Link href="/admin-panel" className="transition hover:text-white">
-            Admin
-          </Link>
+          <a href="#nexus-wall" className="transition hover:text-white">
+            Speakers
+          </a>
+          <a href="#events" className="hidden transition hover:text-white sm:block">
+            Events
+          </a>
+          <a href="#support" className="transition hover:text-white">
+            Support
+          </a>
         </nav>
       </div>
     </header>

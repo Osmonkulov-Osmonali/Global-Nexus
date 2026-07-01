@@ -20,10 +20,18 @@ import {
   submitApplication,
   subscribeToApplications,
 } from "@/lib/data/applications";
+import {
+  createEvent,
+  deleteEvent,
+  fetchEvents,
+  subscribeToEvents,
+} from "@/lib/data/events";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { STORAGE_KEY } from "@/lib/storage";
 import type {
+  AdminEventInput,
   AdminSpeakerInput,
+  EventItem,
   Speaker,
   SpeakerApplication,
   SpeakerApplicationInput,
@@ -32,6 +40,7 @@ import type {
 interface SpeakersContextValue {
   speakers: Speaker[];
   applications: SpeakerApplication[];
+  events: EventItem[];
   count: number;
   isLoaded: boolean;
   usesSupabase: boolean;
@@ -39,6 +48,8 @@ interface SpeakersContextValue {
   removeSpeaker: (id: string) => Promise<void>;
   submitSpeakerApplication: (input: SpeakerApplicationInput) => Promise<SpeakerApplication>;
   removeApplication: (id: string) => Promise<void>;
+  addEvent: (input: AdminEventInput) => Promise<EventItem>;
+  removeEvent: (id: string) => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -47,16 +58,19 @@ const SpeakersContext = createContext<SpeakersContextValue | null>(null);
 export function SpeakersProvider({ children }: { children: ReactNode }) {
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
   const [applications, setApplications] = useState<SpeakerApplication[]>([]);
+  const [events, setEvents] = useState<EventItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const usesSupabase = isSupabaseConfigured();
 
   const refresh = useCallback(async () => {
-    const [nextSpeakers, nextApplications] = await Promise.all([
-      fetchSpeakers(),
-      fetchApplications(),
+    const [nextSpeakers, nextApplications, nextEvents] = await Promise.all([
+      fetchSpeakers().catch(() => [] as Speaker[]),
+      fetchApplications().catch(() => [] as SpeakerApplication[]),
+      fetchEvents().catch(() => [] as EventItem[]),
     ]);
     setSpeakers(nextSpeakers);
     setApplications(nextApplications);
+    setEvents(nextEvents);
     setIsLoaded(true);
   }, []);
 
@@ -66,15 +80,19 @@ export function SpeakersProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsubscribeSpeakers = subscribeToSpeakers(() => {
-      fetchSpeakers().then(setSpeakers);
+      fetchSpeakers().then(setSpeakers).catch(() => {});
     });
     const unsubscribeApplications = subscribeToApplications(() => {
-      fetchApplications().then(setApplications);
+      fetchApplications().then(setApplications).catch(() => {});
+    });
+    const unsubscribeEvents = subscribeToEvents(() => {
+      fetchEvents().then(setEvents).catch(() => {});
     });
 
     return () => {
       unsubscribeSpeakers?.();
       unsubscribeApplications?.();
+      unsubscribeEvents?.();
     };
   }, []);
 
@@ -83,7 +101,7 @@ export function SpeakersProvider({ children }: { children: ReactNode }) {
 
     const onStorage = (e: StorageEvent) => {
       if (e.key === null || e.key === STORAGE_KEY) {
-        fetchSpeakers().then(setSpeakers);
+        fetchSpeakers().then(setSpeakers).catch(() => {});
       }
     };
     window.addEventListener("storage", onStorage);
@@ -92,18 +110,14 @@ export function SpeakersProvider({ children }: { children: ReactNode }) {
 
   const addSpeaker = useCallback(async (input: AdminSpeakerInput) => {
     const speaker = await createSpeaker(input);
-    if (!usesSupabase) {
-      setSpeakers(await fetchSpeakers());
-    }
+    setSpeakers(await fetchSpeakers());
     return speaker;
-  }, [usesSupabase]);
+  }, []);
 
   const removeSpeaker = useCallback(async (id: string) => {
     await deleteSpeaker(id);
-    if (!usesSupabase) {
-      setSpeakers(await fetchSpeakers());
-    }
-  }, [usesSupabase]);
+    setSpeakers(await fetchSpeakers());
+  }, []);
 
   const submitSpeakerApplication = useCallback(async (input: SpeakerApplicationInput) => {
     const application = await submitApplication(input);
@@ -115,23 +129,35 @@ export function SpeakersProvider({ children }: { children: ReactNode }) {
 
   const removeApplication = useCallback(async (id: string) => {
     await deleteApplication(id);
-    if (!usesSupabase) {
-      setApplications(await fetchApplications());
-    }
-  }, [usesSupabase]);
+    setApplications(await fetchApplications());
+  }, []);
+
+  const addEvent = useCallback(async (input: AdminEventInput) => {
+    const event = await createEvent(input);
+    setEvents(await fetchEvents());
+    return event;
+  }, []);
+
+  const removeEvent = useCallback(async (id: string) => {
+    await deleteEvent(id);
+    setEvents(await fetchEvents());
+  }, []);
 
   return (
     <SpeakersContext.Provider
       value={{
         speakers,
         applications,
-        count: speakers.length,
+        events,
+        count: speakers.filter((s) => s.status !== "upcoming").length,
         isLoaded,
         usesSupabase,
         addSpeaker,
         removeSpeaker,
         submitSpeakerApplication,
         removeApplication,
+        addEvent,
+        removeEvent,
         refresh,
       }}
     >
